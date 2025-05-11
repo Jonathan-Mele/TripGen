@@ -1,0 +1,18 @@
+.signin {
+  display: inline-block;
+  border: 1px solid #F7B267;
+  color: #FFF9F3;
+  padding: 10px 20px;
+  border-radius: 24px;
+  font-family: "Roboto","Arial",sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  background-color: transparent;
+  transition: background-color 0.2s ease, border 0.2s ease;
+}
+
+.signin:hover {
+  background-color: #F7B267;
+  border: 1px solid transparent;
+}

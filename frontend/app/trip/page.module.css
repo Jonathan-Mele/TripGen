@@ -1,0 +1,70 @@
+/* app/trip/page.module.css */
+
+/* Main container: centers content with warm background */
+.main {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #FFF9F3;
+    padding: 2rem;
+    box-sizing: border-box;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    color: #5A463A;
+  }
+  
+  /* Headline */
+  .main h1 {
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+  
+  /* Description or placeId line */
+  .main p {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  
+  /* Form rows */
+  .formRow {
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 1.2rem;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .formRow label {
+    margin-bottom: 0.3rem;
+    font-weight: 500;
+  }
+  
+  .formRow input {
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #ffffff;
+    color: #171717;
+    box-sizing: border-box;
+  }
+  
+  /* Submit button */
+  .submitButton {
+    padding: 0.6rem 1.2rem;
+    background: #F7B267;
+    color: #FFF9F3;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  
+  .submitButton:hover {
+    background: #F19143;
+  }  
