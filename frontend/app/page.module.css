@@ -1,34 +1,28 @@
-/* page.module.css */
-
-/* Main container: centers content vertically and horizontally, with a warm background */
 .main {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: #FFF9F3;         /* Soft, warm background color */
+  background: #FFF9F3;
   padding: 2rem;
   box-sizing: border-box;
   font-family: 'Helvetica Neue', Arial, sans-serif;
-  color: #5A463A;             /* Warm, muted brown text */
+  color: #5A463A;
 }
 
-/* Headline styling */
 .main h1 {
   font-size: 2.2rem;
   margin-bottom: 0.5rem;
   text-align: center;
 }
 
-/* Paragraph styling */
 .main p {
   font-size: 1.1rem;
   margin-bottom: 1.5rem;
   text-align: center;
 }
 
-/* Container for the autocomplete widget */
 #autocomplete-container {
   width: 320px;
   padding: 1rem;
@@ -37,4 +31,38 @@
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-top: 1rem;
+}
+
+.searchButton {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  background-color: #F7B267;
+  color: #FFF9F3;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.1s ease-in-out;
+}
+
+.searchButton:hover {
+  transform: translateY(-2px);
+}
+
+.tripsButton {
+  margin-top: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  background-color: #5A463A;
+  color: #FFF9F3;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.1s ease-in-out;
+}
+
+.tripsButton:hover {
+  transform: translateY(-2px);
 }

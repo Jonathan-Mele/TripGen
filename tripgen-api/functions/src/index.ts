@@ -24,6 +24,7 @@ import {renderItineraryPdf} from "./pdfGen";
 
 initializeApp();
 const db = getFirestore();
+db.settings({ignoreUndefinedProperties: true});
 
 /**
  * This uses the classic v1 auth trigger — it’s fully supported
@@ -97,3 +98,35 @@ export const generateItinerary = functions
       return {pdfBase64};
     }
   );
+
+export const getTrips = functions
+  .region("us-west1")
+  .https
+  .onCall(async (_data, context) => {
+    if (!context.auth) {
+      throw new functions.https.HttpsError(
+        "unauthenticated",
+        "You must be signed in to fetch trips."
+      );
+    }
+
+    const tripsSnap = await db
+      .collection("users")
+      .doc(context.auth.uid)
+      .collection("trips")
+      .orderBy("created", "desc")
+      .get();
+
+    const trips = tripsSnap.docs.map((doc) => {
+      const d = doc.data();
+      return {
+        location: d.location as string,
+        created: d.created as number,
+        pdfBase64: d.pdfBase64 as string,
+        // if I want to return the parsed JSON itinerary too:
+        // itinerary: d.processedItineraryData as YourItineraryType
+      };
+    });
+
+    return {trips};
+  });

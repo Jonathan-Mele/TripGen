@@ -92,6 +92,7 @@ export default function Home() {
           <p>Loading Google Maps API…</p>
         )}
         <div id="autocomplete-container" />
+  
         <button
           className={styles.searchButton}
           style={{ marginTop: "1rem" }}
@@ -99,6 +100,20 @@ export default function Home() {
         >
           Continue
         </button>
+  
+        {/* ↓ My Trips button right underneath ↓ */}
+        <button
+          className={styles.searchButton}
+          style={{ 
+            marginTop: "0.5rem", 
+            background: "#888", 
+            color: "#fff" 
+          }}
+          onClick={() => router.push("/trips")}
+        >
+          My Past Trips
+        </button>
+  
         {placeName && (
           <p style={{ marginTop: "0.5rem" }}>
             Selected: <strong>{placeName}</strong>
@@ -106,5 +121,5 @@ export default function Home() {
         )}
       </main>
     </>
-  );
+  )
 }
