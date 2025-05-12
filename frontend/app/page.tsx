@@ -1,16 +1,18 @@
-'use client';
+"use client";
 
-import Script from 'next/script';
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import styles from './page.module.css';
+import Script from "next/script";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import styles from "./page.module.css";
 
 export default function Home() {
   const [mapsLoaded, setMapsLoaded] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState<string>('');
+  const [placeId, setPlaceId]     = useState<string>("");
+  const [placeName, setPlaceName] = useState<string>("");
   const router = useRouter();
 
   useEffect(() => {
+    // callback for when the Maps script loads
     (window as any).initHome = () => {
       setMapsLoaded(true);
       initAutocompleteWidget();
@@ -18,49 +20,61 @@ export default function Home() {
 
     async function initAutocompleteWidget() {
       if (!window.google) {
-        console.error("Google Maps API is not available.");
+        console.error("Google Maps API not available");
         return;
       }
-      try {
-        await window.google.maps.importLibrary('places');
-        //@ts-ignore
-        const placeAutocomplete = new window.google.maps.places.PlaceAutocompleteElement();
-        const container = document.getElementById('autocomplete-container');
-        if (!container) {
-          console.warn('Autocomplete container not found; appending to body.');
-          document.body.appendChild(placeAutocomplete);
-        } else {
-          container.appendChild(placeAutocomplete);
+      // load the new Web Components library
+      await window.google.maps.importLibrary("places");
+      //@ts-ignore
+      const widget = new window.google.maps.places.PlaceAutocompleteElement();
+      const container = document.getElementById("autocomplete-container");
+      if (container) container.appendChild(widget);
+      else document.body.appendChild(widget);
+
+      widget.addEventListener("gmp-select", (async (event: any) => {
+        const pred = event.detail?.placePrediction ?? event.placePrediction;
+        if (!pred?.placeId) {
+          console.error("No placePrediction or placeId!");
+          return;
         }
 
-        placeAutocomplete.addEventListener(
-          'gmp-select',
-          (async (event: any) => {
-            // new widget’s event.detail may differ; try both:
-            const pred = event.detail?.placePrediction ?? event.placePrediction;
-            if (pred?.toPlace) {
-              const place = pred.toPlace();
-              await place.fetchFields({ fields: [] });
-              const details = place.toJSON();
-              setSelectedPlace(details.placeId || details.id || '');
-            } else {
-              console.error('No prediction on event', event);
-            }
-          }) as unknown as EventListener
+        // save the ID right away
+        setPlaceId(pred.placeId);
+
+        // now fetch full Place Details for just the "name" field
+        const service = new google.maps.places.PlacesService(
+          document.createElement("div")
         );
-      } catch (e) {
-        console.error('Error initializing the autocomplete widget:', e);
-      }
+        service.getDetails(
+          {
+            placeId: pred.placeId,
+            fields: ["name"],
+          },
+          (placeResult, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK && placeResult?.name) {
+              setPlaceName(placeResult.name);
+            } else {
+              console.warn("Place Details failed:", status);
+              // fallback to description text if needed:
+              setPlaceName(pred.description ?? "");
+            }
+          }
+        );
+      }) as unknown as EventListener);
     }
   }, []);
 
   const handleSubmit = () => {
-    if (!selectedPlace) {
-      alert('Please select a place before continuing.');
+    if (!placeId) {
+      alert("Please select a place first.");
       return;
     }
-    // navigate to /trip with placeId in the query
-    router.push(`/trip?placeId=${encodeURIComponent(selectedPlace)}`);
+    router.push(
+      `/trip?${new URLSearchParams({
+        placeId,
+        placeName,
+      }).toString()}`
+    );
   };
 
   return (
@@ -73,18 +87,23 @@ export default function Home() {
       <main className={styles.main}>
         <h1>Welcome to TripGen!</h1>
         {mapsLoaded ? (
-          <p>Enter your destination here to get started!</p>
+          <p>Enter your destination here to get started:</p>
         ) : (
-          <p>Loading Google Maps API...</p>
+          <p>Loading Google Maps API…</p>
         )}
-        <div id="autocomplete-container"></div>
+        <div id="autocomplete-container" />
         <button
           className={styles.searchButton}
-          style={{ marginTop: '1rem' }}
+          style={{ marginTop: "1rem" }}
           onClick={handleSubmit}
         >
           Continue
         </button>
+        {placeName && (
+          <p style={{ marginTop: "0.5rem" }}>
+            Selected: <strong>{placeName}</strong>
+          </p>
+        )}
       </main>
     </>
   );

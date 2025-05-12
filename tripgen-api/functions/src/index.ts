@@ -19,7 +19,8 @@ import {getFirestore} from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
 import * as functions from "firebase-functions";
 
-import {generateItineraryService, ItineraryRequest, ItineraryResponse} from "./itinerary";
+import {generateItineraryService, ItineraryRequest, processItinerary} from "./itinerary";
+import {renderItineraryPdf} from "./pdfGen";
 
 initializeApp();
 const db = getFirestore();
@@ -43,54 +44,56 @@ export const createUser = functions
   });
 
 
-  //Main function to generate itinerary
-  // functions/src/index.ts
-  export const generateItinerary = functions
-  .region('us-west1')
+// Main function to generate itinerary
+// functions/src/index.ts
+export const generateItinerary = functions
+  .region("us-west1")
   .https
   .onCall(
     async (
-      data: ItineraryRequest,
+      data: ItineraryRequest & { locationName: string },
       context
-    ): Promise<{
-      hotel: any;
-      poiGroups: Record<string, any[]>;
-    }> => {
+    ): Promise<{ pdfBase64: string;}> => {
       if (!context.auth) {
         throw new functions.https.HttpsError(
-          'unauthenticated',
-          'Login required'
+          "unauthenticated",
+          "Login required"
         );
       }
       const itinerary_budget = data.budget/data.days;
       let budget_level: number;
-      if (itinerary_budget < 75){
+      if (itinerary_budget < 75) {
         budget_level = 0;
-      }
-      else if(itinerary_budget < 150){
+      } else if (itinerary_budget < 150) {
         budget_level = 1;
-      }
-      else if(itinerary_budget < 300){
+      } else if (itinerary_budget < 300) {
         budget_level = 2;
-      }
-      else if(itinerary_budget < 500){
+      } else if (itinerary_budget < 500) {
         budget_level = 3;
-      }
-      else{
+      } else {
         budget_level = 5;
       }
-      // call your helper, which returns { hotel, poiGroups }
-      return await generateItineraryService(data, budget_level);
+
+      const rawItineraryData = await generateItineraryService(data, budget_level);
+
+      const processedItineraryData = processItinerary(rawItineraryData.hotel, rawItineraryData.poiGroups);
+
+      const pdfBuffer = await renderItineraryPdf(data.locationName, processedItineraryData);
+
+      const pdfBase64 = pdfBuffer.toString("base64");
+
+      await db
+        .collection("users")
+        .doc(context.auth.uid)
+        .collection("trips")
+        .add({
+          created: Date.now(),
+          location: data.locationName,
+          budgetLevel: budget_level,
+          pdfBase64, // you might swap this for a Storage URL
+          processedItineraryData, // store the JSON too if you like
+        });
+
+      return {pdfBase64};
     }
   );
-
-  // 2) (Optional) Persist to Firestore under this user
-      // await db
-      //   .collection('users')
-      //   .doc(context.auth.uid)
-      //   .collection('trips')
-      //   .add({
-      //     created:   Date.now(),
-      //     request:   data,
-      //     itinerary, // you may want to strip large data or store separately
-      //   });

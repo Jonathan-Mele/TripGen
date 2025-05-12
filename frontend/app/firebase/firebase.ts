@@ -2,6 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged, signInWithPopup, User } from "firebase/auth";
 import { GoogleAuthProvider } from "firebase/auth";
+import { getFunctions } from "firebase/functions";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -44,4 +45,8 @@ export function signOut() {
  */
 export function onAuthStateChangedHelper(callback: (user: User | null) => void) {
     return onAuthStateChanged(auth, callback);
+}
+
+export function getTripGenFunctions() {
+    return getFunctions(app, "us-west1");
 }
