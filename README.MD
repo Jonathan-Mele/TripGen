@@ -1,0 +1,1 @@
+https://tripgen-client-321790330163.us-west1.run.app

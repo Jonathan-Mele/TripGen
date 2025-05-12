@@ -1,76 +1,68 @@
 "use client";
-export const dynamic = "force-dynamic"
+export const dynamic = "force-dynamic";
 
-import styles from './page.module.css';
-import { useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
+import styles from "./page.module.css";
 import { httpsCallable } from "firebase/functions";
 import { getTripGenFunctions } from "../firebase/firebase";
 
 export default function TripPage() {
-  const searchParams = useSearchParams();
-  const placeId      = searchParams.get('placeId')   || '';
-  const placeName    = searchParams.get('placeName') || '';
-  const [interests, setInterests] = useState('');
-  const [budget,    setBudget]      = useState(0);
-  const [days,      setDays]        = useState(1);
+  const [placeId, setPlaceId]       = useState("");
+  const [placeName, setPlaceName]   = useState("");
+  const [interests, setInterests]   = useState("");
+  const [budget, setBudget]         = useState(0);
+  const [days, setDays]             = useState(1);
 
-  // Just for dev debugging
+  // grab the URL params on mount
   useEffect(() => {
-    console.log('Current payload will be:', {
+    const p = new URLSearchParams(window.location.search);
+    setPlaceId(p.get("placeId")   || "");
+    setPlaceName(p.get("placeName") || "");
+  }, []);
+
+  // dev-only
+  useEffect(() => {
+    console.log({
       placeId,
       placeName,
-      interests: interests.split(',').map(s => s.trim()).filter(Boolean),
+      interests: interests.split(",").map(s => s.trim()).filter(Boolean),
       budget,
       days,
     });
   }, [placeId, placeName, interests, budget, days]);
 
   const handleSubmit = async () => {
-    if (!placeId) {
-      alert('Missing place – please go back and select one.');
-      return;
-    }
-    if (!interests.trim()) {
-      alert('Please enter at least one interest.');
-      return;
-    }
+    if (!placeId) return alert("Missing place – go back and select one.");
+    if (!interests.trim()) return alert("Enter at least one interest.");
 
-    // Build the payload once
     const payload = {
       placeId,
       locationName: placeName,
-      interests: interests.split(',').map(s => s.trim()).filter(Boolean),
+      interests: interests.split(",").map(s => s.trim()).filter(Boolean),
       budget,
       days,
     };
 
     try {
-      const functions = getTripGenFunctions();
-      const genItin   = httpsCallable(functions, 'generateItinerary');
-      const result  = await genItin(payload);
-      // result.data is `any` by default; assert its shape:
-      const { pdfBase64 } = result.data as { pdfBase64: string };
+      const fn      = getTripGenFunctions();
+      const genItin = httpsCallable(fn, "generateItinerary");
+      const res     = await genItin(payload);
+      const { pdfBase64 } = res.data as { pdfBase64: string };
 
-      // now turn it into a blob and download…
-      const byteChars   = atob(pdfBase64);
-      const byteNumbers = Array.from(byteChars).map(c => c.charCodeAt(0));
-      const byteArray   = new Uint8Array(byteNumbers);
-      const blob        = new Blob([byteArray], { type: 'application/pdf' });
-
-      const url = URL.createObjectURL(blob);
-      const a   = document.createElement('a');
-      a.href    = url;
-      const safeName = placeName.replace(/[^\w\d_-]/g, '_').slice(0, 30);
-      a.download = `itinerary_${safeName}.pdf`;
+      const bytes      = atob(pdfBase64);
+      const arr        = new Uint8Array(Array.from(bytes).map(c => c.charCodeAt(0)));
+      const blob       = new Blob([arr], { type: "application/pdf" });
+      const url        = URL.createObjectURL(blob);
+      const a          = document.createElement("a");
+      a.href           = url;
+      a.download       = `itinerary_${placeName.replace(/[^\w\d_-]/g, "_")}.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-
-    } catch (err) {
-      console.error('Itinerary generation failed:', err);
-      alert('Sorry, something went wrong. Please try again.');
+    } catch (e) {
+      console.error(e);
+      alert("Sorry, something went wrong.");
     }
   };
 
@@ -92,14 +84,9 @@ export default function TripPage() {
         <label htmlFor="budget">Budget ($):</label>
         <input
           id="budget"
-          type="text"
-          placeholder="e.g. 150"
-          value={budget === 0 ? "" : budget.toString()}
-          onChange={e => {
-            const v = parseInt(e.target.value.replace(/\D/g, ""), 10);
-            if (!isNaN(v)) setBudget(v);
-            else setBudget(0);
-          }}
+          type="number"
+          value={budget || ""}
+          onChange={e => setBudget(Number(e.target.value))}
         />
       </div>
 
@@ -107,22 +94,14 @@ export default function TripPage() {
         <label htmlFor="days">Number of days:</label>
         <input
           id="days"
-          type="text"
-          placeholder=""
-          value={days === 0 ? "" : days.toString()}
-          onChange={e => {
-            const v = parseInt(e.target.value.replace(/\D/g, ""), 10);
-            if (!isNaN(v)) setDays(v);
-            else setDays(0);
-          }}
+          type="number"
+          min={1}
+          value={days}
+          onChange={e => setDays(Number(e.target.value))}
         />
       </div>
 
-
-      <button
-        className={styles.submitButton}
-        onClick={handleSubmit}
-      >
+      <button className={styles.submitButton} onClick={handleSubmit}>
         Generate &amp; Download PDF
       </button>
     </main>
