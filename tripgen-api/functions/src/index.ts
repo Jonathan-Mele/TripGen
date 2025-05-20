@@ -28,7 +28,6 @@ db.settings({ignoreUndefinedProperties: true});
 
 /**
  * This uses the classic v1 auth trigger — it’s fully supported
- * in firebase-functions@4.x even though the module itself is v2-capable.
  */
 // eslint-disable-next-line max-len
 export const createUser = functions
@@ -46,7 +45,6 @@ export const createUser = functions
 
 
 // Main function to generate itinerary
-// functions/src/index.ts
 export const generateItinerary = functions
   .region("us-west1")
   .https
@@ -91,8 +89,8 @@ export const generateItinerary = functions
           created: Date.now(),
           location: data.locationName,
           budgetLevel: budget_level,
-          pdfBase64, // you might swap this for a Storage URL
-          processedItineraryData, // store the JSON too if you like
+          pdfBase64, 
+          processedItineraryData, 
         });
 
       return {pdfBase64};
@@ -123,8 +121,6 @@ export const getTrips = functions
         location: d.location as string,
         created: d.created as number,
         pdfBase64: d.pdfBase64 as string,
-        // if I want to return the parsed JSON itinerary too:
-        // itinerary: d.processedItineraryData as YourItineraryType
       };
     });
 

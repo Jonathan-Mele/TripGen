@@ -1,10 +1,9 @@
 // functions/src/itinerary.ts
 
-// import * as functions from "firebase-functions";
+import * as functions from "firebase-functions";
 import {Client} from "@googlemaps/google-maps-services-js";
 
-const mapsKey = "AIzaSyC_V1SbpVbXkVwePe54hE6FcwXKfJzhXYw";
-// functions.config().maps.key;
+const mapsKey = functions.config().maps.key;
 const mapsClient = new Client();
 
 export interface ItineraryRequest {
@@ -39,7 +38,7 @@ export interface SummaryVisit {
   photoRef?: string;
 }
 
-// And the shape of the final itinerary you’ll hand off to your PDF generator
+// Shape of the final itinerary to hand off to the PDF generator
 export interface SummaryItinerary {
   hotel: SummaryVisit;
   poiGroups: Record<string, SummaryVisit[]>;
@@ -49,7 +48,6 @@ interface LatLng { lat: number; lng: number; }
 
 /**
  * Given a text address or Place ID, return its lat/lng.
- * If you only have a Place ID, you can also call `placeDetails` instead.
  */
 async function lookupPlaceCenter(placeId: string): Promise<LatLng> {
   const res = await mapsClient.placeDetails({
@@ -91,7 +89,7 @@ async function searchNearby(
     timeout: 5000,
   });
   if (res.data.status === "ZERO_RESULTS") {
-    return []; // no matches, but not an exception
+    return []; 
   }
   if (res.data.status !== "OK") {
     throw new Error(`Places API error: ${res.data.status}`);
@@ -107,7 +105,7 @@ async function searchNearby(
 
 /**
  * Your core itinerary generator.
- * For now, just returns the raw arrays so you can inspect them.
+ * Find a hotel as well as POIs within a reasonable range of this hotel
  */
 export async function generateItineraryService(
   req: ItineraryRequest,
@@ -125,11 +123,11 @@ export async function generateItineraryService(
   hotels.sort((a, b) => {
     const pa = a.price_level ?? 0;
     const pb = b.price_level ?? 0;
-    if (pb !== pa) return pb - pa; // higher price first
+    if (pb !== pa) return pb - pa; 
 
     const ra = a.rating ?? 0;
     const rb = b.rating ?? 0;
-    return rb - ra; // then higher rating
+    return rb - ra; 
   });
 
   const hotel = hotels[0];

@@ -22,7 +22,7 @@ export default function TripsPage() {
         const functions  = getTripGenFunctions();
         const getTripsFn = httpsCallable<{}, { trips: TripRecord[] }>(
           functions,
-          'getTrips'        // ← must match your onCall export name
+          'getTrips'        
         );
         const res = await getTripsFn({});
         setTrips(res.data.trips);

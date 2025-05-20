@@ -41,7 +41,6 @@
     }
   }
   
-  /* Global overrides for the autocomplete widget */
   :global(place-autocomplete-element) {
     display: block;
     width: 100%;

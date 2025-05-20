@@ -4,7 +4,7 @@ import {SummaryItinerary, SummaryVisit} from "./itinerary"; // adjust the path a
 import {PassThrough} from "stream";
 
 /**
- * Turn your summary data into a simple PDF.
+ * Turn summary data into a simple PDF.
  * @return a Buffer containing the PDF file.
  */
 export async function renderItineraryPdf(
@@ -64,5 +64,5 @@ function writeVisit(doc: PDFKit.PDFDocument, v: SummaryVisit) {
     .text(`• ${v.name}`, {continued: false})
     .text(`  Address: ${v.address}`)
     .text(v.rating != null ? `  Rating: ${v.rating}` : "");
-  // .text(v.photoRef ? `  PhotoRef: ${v.photoRef}` : '');
+  // .text(v.photoRef ? `  PhotoRef: ${v.photoRef}` : ''); - for adding photos later
 }
