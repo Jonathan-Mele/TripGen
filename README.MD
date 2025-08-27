@@ -25,7 +25,3 @@ TripGen is a full-stack travel planning app that lets users generate, save, and 
 | Database     | Firestore (NoSQL) with secure user-specific collections|
 | APIs         | Google Maps API, Google Places API                     |
 | Hosting      | GCP (Cloud Run for frontend, Firebase for backend)     |
-
----
-
-## Project Structure  
